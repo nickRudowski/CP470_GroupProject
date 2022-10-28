@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">CP470_GroupProject</string>
+    <string name="hello_message">Hello World!</string>
+    <string name="ButtonText">I\'m a button</string>
+    <string name="login_text">login</string>
+    <string name="login_edit">login name</string>
+    <string name="password_text">password</string>
+    <string name="radiobutton_text">RadioButton</string>
+    <string name="checkbox_text">CheckBox</string>
+    <string name="switch_text">What does this do?</string>
+    <string name="default_email">"joe.random@gmail.com</string>
+    <string name="shared_email">"joe.random@gmail.com"</string>
+
+    <string name="chatButton_launch">Start Chat</string>
+    <string name="chat_send_button">Send</string>
+    <string name="chat_send_hint">Type message here</string>
+
+    <string name="title_activity_test_toolbar">TestToolbar</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+
+    <string name="testToolbar_button">Test toolbar</string>
+    <string name="about">About</string>
+    <string name="settings_name">Nick Rudowski</string>
+    <string name="toolbarSnackMail">Where is the library?</string>
+    <string name="choice1_selected">You selected item 1</string>
+
+    <string name="ok">ok</string>
+    <string name="cancel">cancel</string>
+    <string name="choice2_title">Do you want to go back?</string>
+</resources>
