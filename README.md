@@ -15,3 +15,4 @@ If the subscription has a manual payment type, the user will have the option to 
 ![SubscriptionListView](https://user-images.githubusercontent.com/109051491/198531230-9ba5d858-cb0b-4303-baf9-954feb0150b9.png){width=10%}
 ![Create Subscription Object](https://user-images.githubusercontent.com/109051491/198531236-808c848f-e8f1-420c-9bd2-0d46f1e16702.png){width=10%}
 ![AddSubSC](https://user-images.githubusercontent.com/109051491/198531240-1a8ba26e-2b1d-490a-85c0-6adca8bb4097.png){width=10%}
+![cp470uml](https://user-images.githubusercontent.com/72317759/199141348-7239f2f7-e812-4141-b749-6e0df6025d5d.png)
