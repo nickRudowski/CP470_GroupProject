@@ -32,4 +32,8 @@
     <string name="ok">ok</string>
     <string name="cancel">cancel</string>
     <string name="choice2_title">Do you want to go back?</string>
+
+    <string name="set_email">Enter username:</string>
+    <string name="set_password">Enter password:</string>
+    <string name="SignUp">Sign Up </string>
 </resources>
