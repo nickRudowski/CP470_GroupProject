@@ -1,10 +1,14 @@
 package com.code.wlu.cp470_groupproject;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -22,6 +26,11 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,6 +45,42 @@ public class SubscriptionList extends AppCompatActivity {
 
     private DatePickerDialog.OnDateSetListener mDateSetListener;
 
+    public SubDatabaseHelper db_helper;
+    public static SQLiteDatabase database;
+    public Cursor cursor;
+    private String[] cols = {SubDatabaseHelper.KEY_MESSAGE, SubDatabaseHelper.KEY_ID};
+
+    public Subscription read(byte[] data) {
+        try {
+            ByteArrayInputStream baip = new ByteArrayInputStream(data);
+            ObjectInputStream ois = new ObjectInputStream(baip);
+            Subscription dataobj = (Subscription ) ois.readObject();
+            return dataobj ;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public byte[] makebyte(Subscription modeldata) {
+        try {
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(modeldata);
+            byte[] employeeAsBytes = baos.toByteArray();
+            ByteArrayInputStream bais = new ByteArrayInputStream(employeeAsBytes);
+            return employeeAsBytes;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @SuppressLint("Range")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,12 +89,40 @@ public class SubscriptionList extends AppCompatActivity {
         AddSubButton  = findViewById(R.id.AddSubButton);
         Log.d("OnCreate", "SubList start");
 
+        //DB Creation
+        db_helper = new SubDatabaseHelper(this);
+        database = db_helper.getWritableDatabase();
+        Log.i(ACTIVITY_NAME, "Created DB -- " + database + "\nDB Open: " + database.isOpen());
+        cursor = database.query(db_helper.TABLE_NAME, cols, null, null, null, null, null);
+
+
         //List of sub objects
         subscriptions = new ArrayList<Subscription>();
 
         //in this case, “this” is the SubWindow, which is-A Context object
         SubAdapter messageAdapter =new SubAdapter( this );
         subView.setAdapter (messageAdapter);
+
+
+        cursor.moveToFirst();
+        //Iterate through cursor to get messages
+        while (!cursor.isAfterLast()) {
+            Log.i(ACTIVITY_NAME, "SQL MESSAGE:" + read(cursor.getBlob(cursor.getColumnIndex(SubDatabaseHelper.KEY_MESSAGE))));
+
+            //Also, print an information message about the Cursor:
+            Log.i(ACTIVITY_NAME, "Cursor’s  column count =" + cursor.getColumnCount());
+
+            subscriptions.add(read(cursor.getBlob(cursor.getColumnIndex(SubDatabaseHelper.KEY_MESSAGE))));
+            cursor.moveToNext();
+        }
+
+        cursor.moveToFirst();
+        for (int i = 0; i < cursor.getColumnCount(); i++) {
+            Log.i(ACTIVITY_NAME, "COLUMN: " + cursor.getColumnName(i));
+            cursor.moveToNext();
+        }
+        cursor.close();
+
 
         //The add subscription button action starts here
         AddSubButton.setOnClickListener(new View.OnClickListener() {
@@ -121,7 +194,19 @@ public class SubscriptionList extends AppCompatActivity {
                                     }
                                 };
                                 //Once the sub object is fully created and customized add it to list of subscriptions.
+
                                 subscriptions.add(sub);
+
+                                ContentValues values = new ContentValues();
+                                values.put(SubDatabaseHelper.KEY_MESSAGE, String.valueOf(makebyte(sub)));
+                                long insertId = database.insert(SubDatabaseHelper.TABLE_NAME, null, values);
+                                String cmd = SubDatabaseHelper.KEY_ID + " = " + insertId;
+                                Cursor cursor = database.query(SubDatabaseHelper.TABLE_NAME, cols, cmd, null, null, null, null);
+                                cursor.moveToFirst();
+                                cursor.close();
+
+                                messageAdapter.notifyDataSetChanged(); //this restarts the process of getCount()/
+
                             }
                         })
                         .setNegativeButton(R.string.cancel,
