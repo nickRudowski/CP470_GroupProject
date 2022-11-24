@@ -29,6 +29,8 @@ public class LoginActivity extends AppCompatActivity {
 
         //Login button object
         Button login_button = findViewById(R.id.login_button);
+        //Signup button object
+        Button signup_button = findViewById(R.id.signup_button);
         //Creates preferences
         SharedPreferences prefs = getSharedPreferences("DefaultEmail", MODE_PRIVATE);
         //Email string
@@ -57,14 +59,17 @@ public class LoginActivity extends AppCompatActivity {
                     Intent intent = new Intent(LoginActivity.this, SubscriptionList.class);
                     startActivity(intent);
                 }
-
-
-
             }
         });
-
-
-
+        //On click of button
+        signup_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Intent to launch main activity
+                Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     public void onResume() {

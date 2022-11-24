@@ -31,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -66,13 +67,12 @@ public class SubscriptionList extends AppCompatActivity {
 
     public byte[] makebyte(Subscription modeldata) {
         try {
-
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(modeldata);
-            byte[] employeeAsBytes = baos.toByteArray();
-            ByteArrayInputStream bais = new ByteArrayInputStream(employeeAsBytes);
-            return employeeAsBytes;
+            byte[] subAsBytes = baos.toByteArray();
+            ByteArrayInputStream bais = new ByteArrayInputStream(subAsBytes);
+            return subAsBytes;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -107,11 +107,11 @@ public class SubscriptionList extends AppCompatActivity {
         cursor.moveToFirst();
         //Iterate through cursor to get messages
         while (!cursor.isAfterLast()) {
-            Log.i(ACTIVITY_NAME, "SQL MESSAGE:" + read(cursor.getBlob(cursor.getColumnIndex(SubDatabaseHelper.KEY_MESSAGE))));
+            Log.i(ACTIVITY_NAME, "SQL MESSAGE:" + read(cursor.getBlob(cursor.getColumnIndex(SubDatabaseHelper.KEY_MESSAGE))).name);
 
             //Also, print an information message about the Cursor:
             Log.i(ACTIVITY_NAME, "Cursor’s  column count =" + cursor.getColumnCount());
-
+            Log.i(ACTIVITY_NAME, "Sub name =" + read(cursor.getBlob(cursor.getColumnIndex(SubDatabaseHelper.KEY_MESSAGE))).name);
             subscriptions.add(read(cursor.getBlob(cursor.getColumnIndex(SubDatabaseHelper.KEY_MESSAGE))));
             cursor.moveToNext();
         }
@@ -198,7 +198,7 @@ public class SubscriptionList extends AppCompatActivity {
                                 subscriptions.add(sub);
 
                                 ContentValues values = new ContentValues();
-                                values.put(SubDatabaseHelper.KEY_MESSAGE, String.valueOf(makebyte(sub)));
+                                values.put(SubDatabaseHelper.KEY_MESSAGE, makebyte(sub));
                                 long insertId = database.insert(SubDatabaseHelper.TABLE_NAME, null, values);
                                 String cmd = SubDatabaseHelper.KEY_ID + " = " + insertId;
                                 Cursor cursor = database.query(SubDatabaseHelper.TABLE_NAME, cols, cmd, null, null, null, null);

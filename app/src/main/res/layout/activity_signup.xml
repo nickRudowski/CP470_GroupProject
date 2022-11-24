@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".LoginActivity">
+    tools:context=".SignupActivity">
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/login_text"
+        android:text="@string/set_email"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,15 +19,16 @@
         tools:visibility="visible" />
 
     <EditText
-        android:id="@+id/login_name"
+        android:id="@+id/edit_register_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/login_edit"
         android:inputType="textEmailAddress" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/password_text"
+        android:text="@string/set_password"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -35,16 +36,10 @@
         tools:visibility="visible" />
 
     <EditText
-        android:id="@+id/password_name"
+        android:id="@+id/edit_register_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPassword" />
-
-    <Button
-        android:id="@+id/login_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Login" />
 
     <Button
         android:id="@+id/signup_button"
