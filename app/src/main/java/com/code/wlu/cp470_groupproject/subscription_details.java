@@ -15,8 +15,6 @@ import java.text.SimpleDateFormat;
 
 public class subscription_details extends AppCompatActivity {
 
-    private long id;
-    private Subscription sub;
     private String[] subArray;
     private TextView subscriptionNameTextView, subIDTextView, amountTextView, renewalTextView, renewalDateTextView, paymentPlanTextView;
     public String ACTIVITY_NAME = "SubscriptionDetails";
@@ -56,7 +54,8 @@ public class subscription_details extends AppCompatActivity {
             public void onClick(View view) {
                 Log.i(ACTIVITY_NAME, "Delete button clicked");
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra("Response", id);
+                resultIntent.putExtra("subID", subArray[1]);
+                Log.i(ACTIVITY_NAME, "SubID to Delete: " + subArray[1]);
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
                 //Go back to activity when message deleted.

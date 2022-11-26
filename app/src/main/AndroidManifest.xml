@@ -41,6 +41,15 @@
         </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".SubscriptionList" />
+
+        <receiver android:name=".myBackgroundProcess"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="BackgroundProcess"/>
+            </intent-filter>
+
+        </receiver>
     </application>
 
 </manifest>

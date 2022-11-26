@@ -54,9 +54,14 @@ public class LoginActivity extends AppCompatActivity {
                 myEditor.putString(String.valueOf(R.string.shared_email), login.getText().toString());
                 myEditor.commit();
 
+                Log.i(ACTIVITY_NAME, "Username in login: " + login.getText().toString());
+
                 if(password.length() > 0 && Patterns.EMAIL_ADDRESS.matcher(login.getText()).matches()){
                     //Intent to launch main activity
+                    Log.i(ACTIVITY_NAME, "Username in login: " + login.getText().toString());
                     Intent intent = new Intent(LoginActivity.this, SubscriptionList.class);
+                    intent.putExtra("UserName", login.getText().toString());
+                    Log.i(ACTIVITY_NAME, "Username in login: " + login.getText().toString());
                     startActivity(intent);
                 }
             }

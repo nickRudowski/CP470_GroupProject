@@ -1,9 +1,11 @@
 package com.code.wlu.cp470_groupproject;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -58,9 +60,12 @@ public class SubscriptionList extends AppCompatActivity {
     public ArrayList<Subscription> subscriptions;
     public ListView subView;
     public Button AddSubButton;
-
+    public String loginUsername;
     public FirebaseDatabase database = FirebaseDatabase.getInstance();
     public DatabaseReference DatabaseRef = database.getReference();
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +75,18 @@ public class SubscriptionList extends AppCompatActivity {
         AddSubButton  = findViewById(R.id.AddSubButton);
         Log.d("OnCreate", "SubList start");
 
+        Bundle bundleFromLogin = getIntent().getExtras();
+        if(bundleFromLogin!=null){
+            loginUsername = bundleFromLogin.getString("UserName").replaceAll("[.]", "");
+            Log.i(ACTIVITY_NAME, "LoginUsername: " + loginUsername);
+        }
+
         //DB Creation
-        DatabaseRef.child("Subscriptions");
+        DatabaseRef.child("Users");
 
         //List of sub objects
         subscriptions = new ArrayList<Subscription>();
+
 
         //in this case, “this” is the SubWindow, which is-A Context object
         SubAdapter subAdapter =new SubAdapter( this );
@@ -82,7 +94,7 @@ public class SubscriptionList extends AppCompatActivity {
 
         //Used for reading from DB This calls the subAdapter too.
         //So if the DB is modified somehow, this will get called and update the view
-        DatabaseReference UserRef = FirebaseDatabase.getInstance().getReference().child("Subscriptions");
+        DatabaseReference UserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(loginUsername).child("Subscriptions");
         UserRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -92,12 +104,20 @@ public class SubscriptionList extends AppCompatActivity {
                     subscriptions.add(achild.getValue(Subscription.class));
                     subAdapter.notifyDataSetChanged(); //this restarts the process of getCount()
                 }
+
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.w("firebase application", "Failed to read value.", error.toException());
             }
         });
+
+        Intent intent = new Intent(this, myBackgroundProcess.class);
+        intent.setAction("BackgroundProcess");
+        intent.putExtra("subArray", subscriptions);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, 100, pendingIntent);
 
         //The add subscription button action starts here
         AddSubButton.setOnClickListener(new View.OnClickListener() {
@@ -131,7 +151,7 @@ public class SubscriptionList extends AppCompatActivity {
                                 Date newDate = new Date(dateEdt.getYear(), dateEdt.getMonth(), dateEdt.getDayOfMonth());
                                 sub.renewal_date = newDate;
 
-                                database.getReference("Subscriptions").child("Sub " + sub.keyID).setValue(sub);
+                                database.getReference("Users").child(loginUsername).child("Subscriptions").child("Sub " + sub.keyID).setValue(sub);
 
                             }
                         })
@@ -176,7 +196,10 @@ public class SubscriptionList extends AppCompatActivity {
 
         Log.i(ACTIVITY_NAME, "DELETE!!!");
         if (requestCode == 1 && resultCode != RESULT_CANCELED) {
-            long id = data.getLongExtra("Response", 0);
+
+            String deleteSubID = data.getStringExtra("subID");
+            Log.i(ACTIVITY_NAME, "SUB ID TO DELETE: " + deleteSubID);
+            FirebaseDatabase.getInstance().getReference("Users").child(loginUsername).child("Subscriptions").child("Sub " + deleteSubID).removeValue();
 
             //Delete message
             //database.delete(ChatDatabaseHelper.TABLE_NAME, ChatDatabaseHelper.KEY_ID + " = " + id, null);
@@ -190,6 +213,8 @@ public class SubscriptionList extends AppCompatActivity {
 
 
     }
+
+
 
     //Shows the sub in the listview
     private class SubAdapter extends ArrayAdapter<Subscription>{
@@ -221,8 +246,6 @@ public class SubscriptionList extends AppCompatActivity {
             return result;
         }
     }
-
-
 
 
 }
