@@ -7,15 +7,19 @@ import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -24,14 +28,25 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.sql.Blob;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -44,43 +59,9 @@ public class SubscriptionList extends AppCompatActivity {
     public ListView subView;
     public Button AddSubButton;
 
-    private DatePickerDialog.OnDateSetListener mDateSetListener;
+    public FirebaseDatabase database = FirebaseDatabase.getInstance();
+    public DatabaseReference DatabaseRef = database.getReference();
 
-    public SubDatabaseHelper db_helper;
-    public static SQLiteDatabase database;
-    public Cursor cursor;
-    private String[] cols = {SubDatabaseHelper.KEY_MESSAGE, SubDatabaseHelper.KEY_ID};
-
-    public Subscription read(byte[] data) {
-        try {
-            ByteArrayInputStream baip = new ByteArrayInputStream(data);
-            ObjectInputStream ois = new ObjectInputStream(baip);
-            Subscription dataobj = (Subscription ) ois.readObject();
-            return dataobj ;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public byte[] makebyte(Subscription modeldata) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(modeldata);
-            byte[] subAsBytes = baos.toByteArray();
-            ByteArrayInputStream bais = new ByteArrayInputStream(subAsBytes);
-            return subAsBytes;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    @SuppressLint("Range")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,39 +71,33 @@ public class SubscriptionList extends AppCompatActivity {
         Log.d("OnCreate", "SubList start");
 
         //DB Creation
-        db_helper = new SubDatabaseHelper(this);
-        database = db_helper.getWritableDatabase();
-        Log.i(ACTIVITY_NAME, "Created DB -- " + database + "\nDB Open: " + database.isOpen());
-        cursor = database.query(db_helper.TABLE_NAME, cols, null, null, null, null, null);
-
+        DatabaseRef.child("Subscriptions");
 
         //List of sub objects
         subscriptions = new ArrayList<Subscription>();
 
         //in this case, “this” is the SubWindow, which is-A Context object
-        SubAdapter messageAdapter =new SubAdapter( this );
-        subView.setAdapter (messageAdapter);
+        SubAdapter subAdapter =new SubAdapter( this );
+        subView.setAdapter (subAdapter);
 
-
-        cursor.moveToFirst();
-        //Iterate through cursor to get messages
-        while (!cursor.isAfterLast()) {
-            Log.i(ACTIVITY_NAME, "SQL MESSAGE:" + read(cursor.getBlob(cursor.getColumnIndex(SubDatabaseHelper.KEY_MESSAGE))).name);
-
-            //Also, print an information message about the Cursor:
-            Log.i(ACTIVITY_NAME, "Cursor’s  column count =" + cursor.getColumnCount());
-            Log.i(ACTIVITY_NAME, "Sub name =" + read(cursor.getBlob(cursor.getColumnIndex(SubDatabaseHelper.KEY_MESSAGE))).name);
-            subscriptions.add(read(cursor.getBlob(cursor.getColumnIndex(SubDatabaseHelper.KEY_MESSAGE))));
-            cursor.moveToNext();
-        }
-
-        cursor.moveToFirst();
-        for (int i = 0; i < cursor.getColumnCount(); i++) {
-            Log.i(ACTIVITY_NAME, "COLUMN: " + cursor.getColumnName(i));
-            cursor.moveToNext();
-        }
-        cursor.close();
-
+        //Used for reading from DB This calls the subAdapter too.
+        //So if the DB is modified somehow, this will get called and update the view
+        DatabaseReference UserRef = FirebaseDatabase.getInstance().getReference().child("Subscriptions");
+        UserRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                subscriptions.clear();
+                for(DataSnapshot achild : snapshot.getChildren()){
+                    Log.i(ACTIVITY_NAME, achild.getValue().toString());
+                    subscriptions.add(achild.getValue(Subscription.class));
+                    subAdapter.notifyDataSetChanged(); //this restarts the process of getCount()
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.w("firebase application", "Failed to read value.", error.toException());
+            }
+        });
 
         //The add subscription button action starts here
         AddSubButton.setOnClickListener(new View.OnClickListener() {
@@ -145,7 +120,6 @@ public class SubscriptionList extends AppCompatActivity {
                                 double amt = Double.parseDouble(edit.getText().toString());
                                 edit = view2.findViewById(R.id.dialog_payment_plan);
                                 String plan = edit.getText().toString();
-                                //edit = view2.findViewById(R.id.dialog_renewal_date);
                                 CheckBox type = view2.findViewById(R.id.dialog_payment_type_checkBox);
                                 sub.automatic_renewal = type.isChecked();
                                 sub.name = name;
@@ -154,58 +128,10 @@ public class SubscriptionList extends AppCompatActivity {
 
                                 //Start of DatePicker process
                                 DatePicker dateEdt = view2.findViewById(R.id.dialog_renewal_date);
-                                ///String date_in = dateEdt.getText().toString();
-                                // on below line we are adding click listener
-                                // for our pick date button
-                                dateEdt.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        // on below line we are getting
-                                        // the instance of our calendar.
-                                        Calendar c = Calendar.getInstance();
-                                        // on below line we are getting
-                                        // our day, month and year.
-                                        int year = c.get(Calendar.YEAR);
-                                        int month = c.get(Calendar.MONTH);
-                                        int day = c.get(Calendar.DAY_OF_MONTH);
-                                        // on below line we are creating a variable for date picker dialog.
-                                        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                                                // on below line we are passing context.
-                                                SubscriptionList.this,
-                                                android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                                                mDateSetListener,
-                                                // on below line we are passing year,
-                                                // month and day for selected date in our date picker.
-                                                year, month, day);
-                                        // at last we are calling show to
-                                        // display our date picker dialog.
-                                        datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                                        datePickerDialog.show();
-                                    }
-                                });
-                                //Once datepicker is set, create date object and update sub.
-                                mDateSetListener = new DatePickerDialog.OnDateSetListener() {
-                                    @Override
-                                    public void onDateSet(DatePicker view, int year,
-                                                          int monthOfYear, int dayOfMonth) {
-                                        // on below line we are setting date to our edit text.
-                                        //dateEdt.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
-                                        sub.renewal_date = new Date(year, monthOfYear, dayOfMonth);
-                                    }
-                                };
-                                //Once the sub object is fully created and customized add it to list of subscriptions.
+                                Date newDate = new Date(dateEdt.getYear(), dateEdt.getMonth(), dateEdt.getDayOfMonth());
+                                sub.renewal_date = newDate;
 
-                                subscriptions.add(sub);
-
-                                ContentValues values = new ContentValues();
-                                values.put(SubDatabaseHelper.KEY_MESSAGE, makebyte(sub));
-                                long insertId = database.insert(SubDatabaseHelper.TABLE_NAME, null, values);
-                                String cmd = SubDatabaseHelper.KEY_ID + " = " + insertId;
-                                Cursor cursor = database.query(SubDatabaseHelper.TABLE_NAME, cols, cmd, null, null, null, null);
-                                cursor.moveToFirst();
-                                cursor.close();
-
-                                messageAdapter.notifyDataSetChanged(); //this restarts the process of getCount()/
+                                database.getReference("Subscriptions").child("Sub " + sub.keyID).setValue(sub);
 
                             }
                         })
@@ -218,24 +144,68 @@ public class SubscriptionList extends AppCompatActivity {
                 Dialog dialogChoice3 = customDialog.create();
                 dialogChoice3.show();
 
-                messageAdapter.notifyDataSetChanged(); //this restarts the process of getCount()/
+            }
+        });
+
+
+        //Goes from sub list to sub details.
+        subView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Subscription subFromList = subAdapter.getItem(position);
+                Log.i(ACTIVITY_NAME, "SUB FROM LIST: " + subFromList);
+                //Ch 9.9 Slide 41
+                //use a Bundle to pass the message string, and the database id of the selected item to the fragment in the FragmentTransaction
+                Bundle args = new Bundle();
+                String[] subArray = new String[] {subFromList.name, String.valueOf(subFromList.keyID), String.valueOf(subFromList.amount), Subscription.dateToString(subFromList.renewal_date), String.valueOf(subFromList.automatic_renewal), subFromList.payment_plan};
+                args.putStringArray("subArray", subArray);
+
+                    Intent intent = new Intent(SubscriptionList.this, subscription_details.class);
+                    intent.putExtras(args);
+
+                    startActivityForResult(intent, 1);
+
 
 
             }
         });
     }
+    //Delete function
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-    //Item doesn't show up until button is pressed again. NEED TO FIX
+        Log.i(ACTIVITY_NAME, "DELETE!!!");
+        if (requestCode == 1 && resultCode != RESULT_CANCELED) {
+            long id = data.getLongExtra("Response", 0);
+
+            //Delete message
+            //database.delete(ChatDatabaseHelper.TABLE_NAME, ChatDatabaseHelper.KEY_ID + " = " + id, null);
+
+
+            //Restarts activity
+            finish();
+            startActivity(getIntent());
+
+        }
+
+
+    }
+
+    //Shows the sub in the listview
     private class SubAdapter extends ArrayAdapter<Subscription>{
         public SubAdapter(Context ctx) {
             super(ctx, 0);
         }
         public int getCount(){
+            Log.i(ACTIVITY_NAME, "Length of subs: " + subscriptions.size());
             return subscriptions.size();
         }
         public Subscription getItem(int position){
             return subscriptions.get(position);
         }
+
+
+
         //THIS SHOULD GET FLUSHED OUT MORE, Look nicer + more details.
         //Maybe make it so it can be clicked on and more info displayed.
         public View getView(int position, View convertView, ViewGroup parent){
@@ -248,10 +218,11 @@ public class SubscriptionList extends AppCompatActivity {
             TextView subAmount = (TextView)result.findViewById(R.id.subscription_amount);
             subAmount.setText(   String.valueOf(getItem(position).amount)  ); // get the string at position
 
-
             return result;
         }
     }
+
+
 
 
 }

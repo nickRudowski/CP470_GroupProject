@@ -8,7 +8,7 @@ import android.util.Log;
 public class SubDatabaseHelper extends SQLiteOpenHelper {
     public static String ACTIVITY_NAME = "SubDatabaseHelper";
     public static String DATABASE_NAME = "Subscriptions.db";
-    private static int VERSION_NUM = 3;
+    private static int VERSION_NUM = 4;
 
     public static final String KEY_ID = "id";
     public static final String KEY_MESSAGE = "SUBSCRIPTION";
