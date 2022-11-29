@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.database.DataSnapshot;
@@ -74,7 +75,9 @@ public class SubscriptionList extends AppCompatActivity {
         subView = findViewById(R.id.subView);
         AddSubButton  = findViewById(R.id.AddSubButton);
         Log.d("OnCreate", "SubList start");
-
+//        Toolbar toolbar;
+//        toolbar = findViewById(R.id.toolbar2);
+//        setSupportActionBar(toolbar);
         Bundle bundleFromLogin = getIntent().getExtras();
         if(bundleFromLogin!=null){
             loginUsername = bundleFromLogin.getString("UserName").replaceAll("[.]", "");
