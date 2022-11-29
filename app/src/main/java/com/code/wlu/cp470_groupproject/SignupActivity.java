@@ -48,26 +48,30 @@ public class SignupActivity extends AppCompatActivity {
 //        if (!validateForm()) {
 //            return;
 //        }
-
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    // Sign in success, update UI with the signed-in user's information
-                    FirebaseUser user = mAuth.getCurrentUser();
-                    Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-                    startActivity(intent);
+        try {
+            mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                // Sign in success, update UI with the signed-in user's information
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+                                startActivity(intent);
 //                    updateUI(user);
-                } else {
-                    // If sign in fails, display a message to the user.
-                    Log.w(ACTIVITY_NAME, "createUserWithEmail:failure", task.getException());
-                    Toast.makeText(SignupActivity.this, "Authentication failed.",
-                            Toast.LENGTH_SHORT).show();
-//                    updateUI(null);
-                }
-            }
-        });
+                            }
+//                            } else {
+//                                // If sign in fails, display a message to the user.
+//                                Log.w(ACTIVITY_NAME, "createUserWithEmail:failure", task.getException());
+//                                Toast.makeText(SignupActivity.this, "Authentication failed.",
+//                                        Toast.LENGTH_SHORT).show();
+////                    updateUI(null);
+//                            }
+                        }
+                    });
+        }catch (Exception e){
+            Toast.makeText(SignupActivity.this, "Please Provide Valid Arguments", Toast.LENGTH_LONG).show();
+        }
     }
 }
 
