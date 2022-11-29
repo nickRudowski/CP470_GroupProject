@@ -13,6 +13,13 @@
         android:theme="@style/Theme.CP470_GroupProject"
         tools:targetApi="31">
         <activity
+            android:name=".SettingsPage"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".subscription_details"
             android:exported="false">
             <meta-data
@@ -42,13 +49,13 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".SubscriptionList" />
 
-        <receiver android:name=".myBackgroundProcess"
+        <receiver
+            android:name=".myBackgroundProcess"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="BackgroundProcess"/>
+                <action android:name="BackgroundProcess" />
             </intent-filter>
-
         </receiver>
     </application>
 

@@ -1,6 +1,7 @@
 package com.code.wlu.cp470_groupproject;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -26,7 +27,9 @@ public class subscription_details extends AppCompatActivity {
         setContentView(R.layout.activity_subscription_details);
         Bundle args = this.getIntent().getExtras();
         Log.i(ACTIVITY_NAME, "onCreate for MessageDetails.");
-
+//        Toolbar toolbar;
+//        toolbar = findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
         //Take in args
         subArray = args.getStringArray("subArray");
 

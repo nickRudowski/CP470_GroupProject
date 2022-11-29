@@ -10,7 +10,9 @@
     <string name="switch_text">What does this do?</string>
     <string name="default_email">"joe.random@gmail.com</string>
     <string name="shared_email">"joe.random@gmail.com"</string>
-
+    <string name="edit_notifs">Edit Notification Preference</string>
+    <string name="notifs_title">Notifcations</string>
+    <string name="username_title">Username</string>
     <string name="chatButton_launch">Start Chat</string>
     <string name="chat_send_button">Send</string>
     <string name="chat_send_hint">Type message here</string>

@@ -92,7 +92,9 @@ public class SubscriptionList extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         Log.d("OnCreate", "SubList start");
-
+//        Toolbar toolbar;
+//        toolbar = findViewById(R.id.toolbar2);
+//        setSupportActionBar(toolbar);
         Bundle bundleFromLogin = getIntent().getExtras();
         if(bundleFromLogin!=null){
             loginUsername = bundleFromLogin.getString("UserName").replaceAll("[.]", "");
