@@ -14,13 +14,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/AddSubButton"
+<<<<<<< HEAD
+=======
+            android:layout_below="@+id/toolBar"
+            android:layout_alignStart="@+id/toolBar"
+            android:layout_alignTop="@+id/toolBar"
+            android:layout_alignParentStart="true"
+>>>>>>> 589302b091d6e540ee349f7af11a9a8f771beed5
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
+            android:layout_marginTop="60dp"
             android:background="#987878">
 
         </ListView>
 <!--        <include layout="@layout/toolbar"-->
 <!--            android:id="@+id/toolbar2"/>-->
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/teal_200" />
 
         <Button
             android:id="@+id/AddSubButton"
@@ -28,7 +42,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:text="Add Subscription" />
+            android:text="Add Subscription"
+            />
     </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
