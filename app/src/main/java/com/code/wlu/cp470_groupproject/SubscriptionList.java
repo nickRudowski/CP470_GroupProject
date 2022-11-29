@@ -19,6 +19,8 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -29,11 +31,14 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -73,6 +78,10 @@ public class SubscriptionList extends AppCompatActivity {
         setContentView(R.layout.activity_subcription_window);
         subView = findViewById(R.id.subView);
         AddSubButton  = findViewById(R.id.AddSubButton);
+
+        Toolbar toolbar = findViewById(R.id.toolBar);
+        setSupportActionBar(toolbar);
+
         Log.d("OnCreate", "SubList start");
 
         Bundle bundleFromLogin = getIntent().getExtras();
@@ -98,7 +107,9 @@ public class SubscriptionList extends AppCompatActivity {
         UserRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                //Clears the subscriptions array list
                 subscriptions.clear();
+                //Goes through entire database under "Subscriptions"
                 for(DataSnapshot achild : snapshot.getChildren()){
                     Log.i(ACTIVITY_NAME, achild.getValue().toString());
                     subscriptions.add(achild.getValue(Subscription.class));
@@ -185,8 +196,6 @@ public class SubscriptionList extends AppCompatActivity {
 
                     startActivityForResult(intent, 1);
 
-
-
             }
         });
     }
@@ -245,6 +254,40 @@ public class SubscriptionList extends AppCompatActivity {
 
             return result;
         }
+    }
+
+
+    public boolean onCreateOptionsMenu(Menu m){
+        getMenuInflater().inflate(R.menu.toolbar_menu, m );
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem mi){
+        switch(mi.getItemId()){
+            case R.id.Choice1:
+                Log.d("Toolbar", "Option 1 selected");
+                Snackbar.make(findViewById(R.id.Choice1), "Subscription List View", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                break;
+            case R.id.Choice2:
+                Log.d("Toolbar", "Option 2 selected");
+                Snackbar.make(findViewById(R.id.Choice1), "Settings View", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+                //Replace with Settings Activity
+                Intent intent = new Intent(SubscriptionList.this, LoginActivity.class);
+                startActivity(intent);
+
+
+                break;
+            case R.id.settings:
+                Log.d("Toolbar", "Settings selected");
+                int duration = Toast.LENGTH_LONG;
+                Toast toast = Toast.makeText(this , "Creators: Nicholas Rudowski, Syed Raza, Mustafa Syed, Alysha Stone, Caleb Welcome", duration);
+                toast.show(); //display your message box
+                break;
+        }
+        return true;
     }
 
 
