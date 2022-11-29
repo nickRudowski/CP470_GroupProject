@@ -8,11 +8,27 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.android.gms.tasks.OnCompleteListener;
+
+
+
 public class LoginActivity extends AppCompatActivity {
+
+
+
+    private ProgressBar progressBar;
+    private FirebaseAuth mAuth;
 
     public void print(String in_text){
         int duration = Toast.LENGTH_LONG;
@@ -23,8 +39,17 @@ public class LoginActivity extends AppCompatActivity {
     protected static final String ACTIVITY_NAME = "LoginActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser != null){
+            currentUser.reload();
+        }
+
         Log.i(ACTIVITY_NAME, "In onCreate()");
 
         //Login button object
@@ -58,13 +83,10 @@ public class LoginActivity extends AppCompatActivity {
 
                 if(password.length() > 0 && Patterns.EMAIL_ADDRESS.matcher(login.getText()).matches()){
                     //Intent to launch main activity
-                    Log.i(ACTIVITY_NAME, "Username in login: " + login.getText().toString());
-                    Intent intent = new Intent(LoginActivity.this, SubscriptionList.class);
 
-                    intent.putExtra("UserName", login.getText().toString());
-
+                    signIn(login.getText().toString(), password.getText().toString());
                     Log.i(ACTIVITY_NAME, "Username in login: " + login.getText().toString());
-                    startActivity(intent);
+
                 }
             }
         });
@@ -78,6 +100,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
+
 
     public void onResume() {
         super.onResume();
@@ -103,4 +126,33 @@ public class LoginActivity extends AppCompatActivity {
         super.onDestroy();
         Log.i(ACTIVITY_NAME, "In onDestroy()");
     }
+
+    private void signIn(String email, String password) {
+        try {
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                // Sign in success, update UI with the signed-in user's information
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                Intent intent = new Intent(LoginActivity.this, SubscriptionList.class);
+                                intent.putExtra("UserName", email);
+                                startActivity(intent);
+
+                            }else{
+                                Toast.makeText(LoginActivity.this, "Credentials Failed", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+        }catch (Exception e){
+            Toast.makeText(LoginActivity.this, "Please Provide Valid Arguments", Toast.LENGTH_LONG).show();
+        }
+    }
 }
+
+
+
+
+
+
