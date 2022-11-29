@@ -7,6 +7,13 @@
     android:orientation="vertical"
     tools:context=".SignupActivity">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolBar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:title="CP470"
+        android:background="@color/teal_200" />
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"

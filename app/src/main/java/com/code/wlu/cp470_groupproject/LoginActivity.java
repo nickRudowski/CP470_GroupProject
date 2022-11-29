@@ -60,7 +60,9 @@ public class LoginActivity extends AppCompatActivity {
                     //Intent to launch main activity
                     Log.i(ACTIVITY_NAME, "Username in login: " + login.getText().toString());
                     Intent intent = new Intent(LoginActivity.this, SubscriptionList.class);
+
                     intent.putExtra("UserName", login.getText().toString());
+
                     Log.i(ACTIVITY_NAME, "Username in login: " + login.getText().toString());
                     startActivity(intent);
                 }
