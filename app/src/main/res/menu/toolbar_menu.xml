@@ -9,7 +9,7 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/Choice2"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@drawable/settings"
         android:orderInCategory="102"
         android:title="One"
         app:showAsAction="always" />

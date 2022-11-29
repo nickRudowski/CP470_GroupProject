@@ -2,20 +2,32 @@ package com.code.wlu.cp470_groupproject;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SettingsPage extends AppCompatActivity {
 
     public String loginUsername;
     public String ACTIVITY_NAME = "SettingsPage";
+
+    public TextView UsernameTitle;
+    public TextView NotifsTitle;
+    public Button EditNotifsButton;
+    public FirebaseDatabase Database = FirebaseDatabase.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,11 +36,40 @@ public class SettingsPage extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolBar);
         setSupportActionBar(toolbar);
 
+        UsernameTitle = findViewById(R.id.UsernameTitle);
+        NotifsTitle = findViewById(R.id.NotifsTitle);
+        EditNotifsButton = findViewById(R.id.EditNotifsButton);
+
         Bundle bundleFromLogin = getIntent().getExtras();
         if(bundleFromLogin!=null){
             loginUsername = bundleFromLogin.getString("UserName").replaceAll("[.]", "");
             Log.i(ACTIVITY_NAME, "LoginUsername: " + loginUsername);
+//            DatabaseReference DatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(loginUsername).child("UserDetails").child("Notification pref");
+//            Log.i(ACTIVITY_NAME, "Notifs Pref Test "+DatabaseRef.getKey());
         }
+        NotifsTitle.setText("Notification Preferences: 2");
+        UsernameTitle.setText("User Login: "+ loginUsername);
+        // Start Edit Notification Fragment
+
+        EditNotifsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                NotificationFragment fragment = (NotificationFragment) fragmentManager.findFragmentByTag("tag");
+                if(fragment == null) {
+                    Log.i(ACTIVITY_NAME,"Adding Fragment");
+                    fragment = new NotificationFragment();
+                    fragmentTransaction.add(R.id.EditNotifFragment, fragment, "tag");
+                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                } else {
+                    Log.i(ACTIVITY_NAME,"Removing Fragment");
+                    fragmentTransaction.remove(fragment);
+                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+                }
+                fragmentTransaction.commit();
+            }
+        });
 
     }
 
