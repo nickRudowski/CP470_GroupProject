@@ -86,7 +86,6 @@ public class LoginActivity extends AppCompatActivity {
 
                     signIn(login.getText().toString(), password.getText().toString());
                     Log.i(ACTIVITY_NAME, "Username in login: " + login.getText().toString());
-                    Log.i(ACTIVITY_NAME, "Username in login: " + login.getText().toString());
 
                 }
             }
@@ -138,6 +137,7 @@ public class LoginActivity extends AppCompatActivity {
                                 // Sign in success, update UI with the signed-in user's information
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 Intent intent = new Intent(LoginActivity.this, SubscriptionList.class);
+                                intent.putExtra("UserName", email);
                                 startActivity(intent);
 
                             }else{
