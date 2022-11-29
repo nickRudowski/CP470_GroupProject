@@ -13,8 +13,16 @@
         android:orderInCategory="102"
         android:title="One"
         app:showAsAction="always" />
+
+    <item android:id="@+id/Choice3"
+        android:title="One"
+        android:icon="@drawable/logout"
+        android:orderInCategory="103"
+        app:showAsAction="always" />
+
     <item android:id="@+id/settings"
         android:title="@string/about"
         android:orderInCategory="104"
         app:showAsAction="never" />
+
 </menu>

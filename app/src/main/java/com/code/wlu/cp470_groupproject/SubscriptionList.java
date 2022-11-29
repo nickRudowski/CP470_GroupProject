@@ -5,6 +5,9 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
@@ -15,6 +18,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -69,11 +74,15 @@ public class SubscriptionList extends AppCompatActivity {
     public FirebaseDatabase database = FirebaseDatabase.getInstance();
     public DatabaseReference DatabaseRef = database.getReference();
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("Sub Notification", "Channel for Subscription Notis", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.createNotificationChannel(channel);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subcription_window);
         subView = findViewById(R.id.subView);
@@ -83,9 +92,7 @@ public class SubscriptionList extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         Log.d("OnCreate", "SubList start");
-//        Toolbar toolbar;
-//        toolbar = findViewById(R.id.toolbar2);
-//        setSupportActionBar(toolbar);
+
         Bundle bundleFromLogin = getIntent().getExtras();
         if(bundleFromLogin!=null){
             loginUsername = bundleFromLogin.getString("UserName").replaceAll("[.]", "");
@@ -108,7 +115,8 @@ public class SubscriptionList extends AppCompatActivity {
         DatabaseReference UserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(loginUsername).child("Subscriptions");
         UserRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot)
+            {
                 //Clears the subscriptions array list
                 subscriptions.clear();
                 //Goes through entire database under "Subscriptions"
@@ -118,6 +126,15 @@ public class SubscriptionList extends AppCompatActivity {
                     subAdapter.notifyDataSetChanged(); //this restarts the process of getCount()
                 }
 
+                //Send intent to background process.
+                Log.i(ACTIVITY_NAME, "Sending intent to background process. \tArray length is: " + subscriptions.size());
+                Intent intent = new Intent(SubscriptionList.this, myBackgroundProcess.class);
+                intent.setAction("BackgroundProcess");
+                intent.putExtra("subArray", subscriptions);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(SubscriptionList.this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, 10, pendingIntent);
+
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -125,12 +142,7 @@ public class SubscriptionList extends AppCompatActivity {
             }
         });
 
-        Intent intent = new Intent(this, myBackgroundProcess.class);
-        intent.setAction("BackgroundProcess");
-        intent.putExtra("subArray", subscriptions);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, 100, pendingIntent);
+
 
         //The add subscription button action starts here
         AddSubButton.setOnClickListener(new View.OnClickListener() {
@@ -139,6 +151,8 @@ public class SubscriptionList extends AppCompatActivity {
                 AlertDialog.Builder customDialog = new AlertDialog.Builder(SubscriptionList.this);
                 // Get the layout inflater
                 LayoutInflater inflater = SubscriptionList.this.getLayoutInflater();
+
+
                 //Starts custom_dialog which allows for creation of sub object.
                 final View view2 = inflater.inflate(R.layout.custom_dialog, null);
                 customDialog.setView(view2)
@@ -273,12 +287,25 @@ public class SubscriptionList extends AppCompatActivity {
                 break;
             case R.id.Choice2:
                 Log.d("Toolbar", "Option 2 selected");
-                Snackbar.make(findViewById(R.id.Choice1), "Settings View", Snackbar.LENGTH_LONG)
+                Snackbar.make(findViewById(R.id.Choice2), "Settings View", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
                 //Replace with Settings Activity
-                Intent intent = new Intent(SubscriptionList.this, LoginActivity.class);
+                Intent intent = new Intent(SubscriptionList.this, SettingsPage.class);
+                intent.putExtra("UserName", loginUsername);
                 startActivity(intent);
+
+
+                break;
+            case R.id.Choice3:
+                Log.d("Toolbar", "Option 3 selected");
+                Snackbar.make(findViewById(R.id.Choice3), "Log out", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+                //Replace with Settings Activity
+                Intent logout_intent = new Intent(SubscriptionList.this, LoginActivity.class);
+
+                startActivity(logout_intent);
 
 
                 break;

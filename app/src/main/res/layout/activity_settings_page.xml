@@ -56,5 +56,11 @@
         android:layout_height="250dp"
         android:layout_alignParentBottom="true"/>
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolBar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/teal_200" />
+
 
 </RelativeLayout>
