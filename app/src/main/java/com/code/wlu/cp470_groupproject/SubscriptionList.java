@@ -92,9 +92,7 @@ public class SubscriptionList extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         Log.d("OnCreate", "SubList start");
-//        Toolbar toolbar;
-//        toolbar = findViewById(R.id.toolbar2);
-//        setSupportActionBar(toolbar);
+
         Bundle bundleFromLogin = getIntent().getExtras();
         if(bundleFromLogin!=null){
             loginUsername = bundleFromLogin.getString("UserName").replaceAll("[.]", "");
@@ -127,6 +125,7 @@ public class SubscriptionList extends AppCompatActivity {
                     subscriptions.add(achild.getValue(Subscription.class));
                     subAdapter.notifyDataSetChanged(); //this restarts the process of getCount()
                 }
+
                 //Send intent to background process.
                 Log.i(ACTIVITY_NAME, "Sending intent to background process. \tArray length is: " + subscriptions.size());
                 Intent intent = new Intent(SubscriptionList.this, myBackgroundProcess.class);
@@ -288,12 +287,25 @@ public class SubscriptionList extends AppCompatActivity {
                 break;
             case R.id.Choice2:
                 Log.d("Toolbar", "Option 2 selected");
-                Snackbar.make(findViewById(R.id.Choice1), "Settings View", Snackbar.LENGTH_LONG)
+                Snackbar.make(findViewById(R.id.Choice2), "Settings View", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
                 //Replace with Settings Activity
-                Intent intent = new Intent(SubscriptionList.this, LoginActivity.class);
+                Intent intent = new Intent(SubscriptionList.this, SettingsPage.class);
+                intent.putExtra("UserName", loginUsername);
                 startActivity(intent);
+
+
+                break;
+            case R.id.Choice3:
+                Log.d("Toolbar", "Option 3 selected");
+                Snackbar.make(findViewById(R.id.Choice3), "Log out", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+
+                //Replace with Settings Activity
+                Intent logout_intent = new Intent(SubscriptionList.this, LoginActivity.class);
+
+                startActivity(logout_intent);
 
 
                 break;
