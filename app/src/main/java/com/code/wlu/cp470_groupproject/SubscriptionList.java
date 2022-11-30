@@ -142,6 +142,7 @@ public class SubscriptionList extends AppCompatActivity {
                 intent.putExtra("subArray", subscriptions);
                 intent.putExtra("notiPref", pref);
                 intent.putExtra("time", instant.toString());
+                intent.putExtra("userName", loginUsername);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(SubscriptionList.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                 AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
                 alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, 10, pendingIntent);

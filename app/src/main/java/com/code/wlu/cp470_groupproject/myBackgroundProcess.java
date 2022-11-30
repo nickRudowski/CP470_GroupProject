@@ -13,6 +13,8 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -24,8 +26,10 @@ public class myBackgroundProcess extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        int notiPref = intent.getIntExtra("notiPref", 69);
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
 
+        int notiPref = intent.getIntExtra("notiPref", 69);
+        String username = intent.getStringExtra("userName");
         String instant = intent.getStringExtra("time");
 
         ArrayList<Subscription> subscriptions = (ArrayList<Subscription>) intent.getSerializableExtra("subArray");
@@ -54,6 +58,14 @@ public class myBackgroundProcess extends BroadcastReceiver {
                 builder.setContentText("Your Subscription for: " + sub.name + " is due on: " + sub.dateToString(sub.renewal_date));
                 builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
                 builder.setAutoCancel(true);
+
+                database.getReference("Users").child(username).child("Subscriptions").child("Sub " + sub.keyID).child("userNotified").setValue(true);
+
+                Intent back_intent = new Intent(context, SubscriptionList.class);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, back_intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                NotificationCompat.Action action = new NotificationCompat.Action.Builder(android.R.drawable.ic_menu_call, "Launch App", pendingIntent).build();
+
+                builder.addAction(action);
 
                 NotificationManagerCompat managerCompat = NotificationManagerCompat.from(context);
                 managerCompat.notify(sub.keyID, builder.build());
