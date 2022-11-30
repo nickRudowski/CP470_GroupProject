@@ -59,6 +59,8 @@ import java.io.Serializable;
 import java.sql.Blob;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -71,6 +73,7 @@ public class SubscriptionList extends AppCompatActivity {
     public ListView subView;
     public Button AddSubButton;
     public String loginUsername;
+    public int pref;
     public FirebaseDatabase database = FirebaseDatabase.getInstance();
     public DatabaseReference DatabaseRef = database.getReference();
 
@@ -112,7 +115,7 @@ public class SubscriptionList extends AppCompatActivity {
 
         //Used for reading from DB This calls the subAdapter too.
         //So if the DB is modified somehow, this will get called and update the view
-        DatabaseReference UserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(loginUsername).child("Subscriptions");
+        DatabaseReference UserRef = FirebaseDatabase.getInstance().getReference().child("Users").child(loginUsername);
         UserRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot)
@@ -120,7 +123,8 @@ public class SubscriptionList extends AppCompatActivity {
                 //Clears the subscriptions array list
                 subscriptions.clear();
                 //Goes through entire database under "Subscriptions"
-                for(DataSnapshot achild : snapshot.getChildren()){
+
+                for(DataSnapshot achild : snapshot.child("Subscriptions").getChildren()){
                     Log.i(ACTIVITY_NAME, achild.getValue().toString());
                     subscriptions.add(achild.getValue(Subscription.class));
                     subAdapter.notifyDataSetChanged(); //this restarts the process of getCount()
@@ -128,13 +132,21 @@ public class SubscriptionList extends AppCompatActivity {
 
                 //Send intent to background process.
                 Log.i(ACTIVITY_NAME, "Sending intent to background process. \tArray length is: " + subscriptions.size());
+
+                pref = Integer.valueOf(snapshot.child("UserDetails").child("Notification Pref").getValue(String.class));
+                Date instant = new Date();
+                Log.i(ACTIVITY_NAME, "pref: " + pref + " Instant: " + instant);
+
                 Intent intent = new Intent(SubscriptionList.this, myBackgroundProcess.class);
                 intent.setAction("BackgroundProcess");
                 intent.putExtra("subArray", subscriptions);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(SubscriptionList.this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+                intent.putExtra("notiPref", pref);
+                intent.putExtra("time", instant.toString());
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(SubscriptionList.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                 AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
                 alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, 10, pendingIntent);
 
+                //alarmManager.cancel(pendingIntent);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
@@ -293,6 +305,7 @@ public class SubscriptionList extends AppCompatActivity {
                 //Replace with Settings Activity
                 Intent intent = new Intent(SubscriptionList.this, SettingsPage.class);
                 intent.putExtra("UserName", loginUsername);
+                intent.putExtra("pref", pref);
                 startActivity(intent);
 
 

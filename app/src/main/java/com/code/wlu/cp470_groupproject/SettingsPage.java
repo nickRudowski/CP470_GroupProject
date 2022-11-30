@@ -36,6 +36,7 @@ public class SettingsPage extends AppCompatActivity {
     public String ACTIVITY_NAME = "SettingsPage";
     public TextView UsernameTitle;
     public TextView NotifsTitle;
+    public int pref = 2;
     public Button EditNotifsButton;
     public FirebaseDatabase Database = FirebaseDatabase.getInstance();
 
@@ -52,11 +53,12 @@ public class SettingsPage extends AppCompatActivity {
         Bundle bundleFromLogin = getIntent().getExtras();
         if(bundleFromLogin!=null){
             loginUsername = bundleFromLogin.getString("UserName").replaceAll("[.]", "");
+            pref = bundleFromLogin.getInt("pref");
             Log.i(ACTIVITY_NAME, "LoginUsername: " + loginUsername);
 //            DatabaseReference DatabaseRef = FirebaseDatabase.getInstance().getReference("Users").child(loginUsername).child("UserDetails").child("Notification pref");
 //            Log.i(ACTIVITY_NAME, "Notifs Pref Test "+DatabaseRef.getKey());
         }
-        NotifsTitle.setText("Notification Preferences: 2");
+        NotifsTitle.setText("Notification Preferences: " + pref);
         UsernameTitle.setText("User Login: "+ loginUsername);
         // Start Edit Notification Fragment
 

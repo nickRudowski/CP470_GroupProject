@@ -24,9 +24,14 @@ public class myBackgroundProcess extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
+        int notiPref = intent.getIntExtra("notiPref", 69);
+
+        String instant = intent.getStringExtra("time");
+
         ArrayList<Subscription> subscriptions = (ArrayList<Subscription>) intent.getSerializableExtra("subArray");
 
-        Log.i("Background process", "received, array length: " + subscriptions.size());
+
+        Log.i("Background process", "received @ " + instant + ", array length: " + subscriptions.size() + "\t with noti pref of " + notiPref);
 
         Date currentDate = new Date();
         currentDate.setYear(Calendar.getInstance().get(Calendar.YEAR));
@@ -36,7 +41,7 @@ public class myBackgroundProcess extends BroadcastReceiver {
             //int daysApart = (sub.renewal_date.getDate() - currentDate.getDate());
             int daysApart = (int)((currentDate.getTime() - sub.renewal_date.getTime()) / (1000*60*60*24l));
             Log.i("Background process", "Days apart from current date, and " + sub.name + " due date is: " + daysApart + "\nCurrent date: " + Subscription.dateToString(currentDate) + "\tdue date: " + Subscription.dateToString(sub.renewal_date) + "\nCurrent year: " + currentDate.getYear() + " month: " + currentDate.getMonth() + " day: " + currentDate.getDate() + " time: " + currentDate.getTime() + " time of sub: " + sub.renewal_date.getTime());
-            if(daysApart >= -2 && daysApart <=0){
+            if(daysApart >= -notiPref && daysApart <=0){
                 Log.i("Background process", "2 days or 1 day before");
                 //Notification;
 
