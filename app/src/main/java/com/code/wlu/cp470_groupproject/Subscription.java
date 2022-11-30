@@ -22,6 +22,8 @@ public class Subscription implements Serializable {
     public boolean automatic_renewal = true;
     //Date obj for when it needs to be renewed.
     public Date renewal_date = new Date();
+    //T/F has been pinged already.
+    public boolean userNotified = false;
 
     //Work in progress, Don't think String is the right type.
     public String payment_plan;

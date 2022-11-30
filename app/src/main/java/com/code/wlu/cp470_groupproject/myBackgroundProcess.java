@@ -40,9 +40,12 @@ public class myBackgroundProcess extends BroadcastReceiver {
         for( Subscription sub : subscriptions){
             //int daysApart = (sub.renewal_date.getDate() - currentDate.getDate());
             int daysApart = (int)((currentDate.getTime() - sub.renewal_date.getTime()) / (1000*60*60*24l));
-            Log.i("Background process", "Days apart from current date, and " + sub.name + " due date is: " + daysApart + "\nCurrent date: " + Subscription.dateToString(currentDate) + "\tdue date: " + Subscription.dateToString(sub.renewal_date) + "\nCurrent year: " + currentDate.getYear() + " month: " + currentDate.getMonth() + " day: " + currentDate.getDate() + " time: " + currentDate.getTime() + " time of sub: " + sub.renewal_date.getTime());
-            if(daysApart >= -notiPref && daysApart <=0){
+            Log.i("Background process", "Days apart from current date, and " + sub.name + " due date is: " + daysApart + "\nCurrent date: " + Subscription.dateToString(currentDate) + "\tdue date: " + Subscription.dateToString(sub.renewal_date) + "\nCurrent year: " + currentDate.getYear() + " month: " + currentDate.getMonth() + " day: " + currentDate.getDate() + " time: " + currentDate.getTime() + " time of sub: " + sub.renewal_date.getTime() + "\nSub notified: " + sub.userNotified);
+            if(daysApart >= -notiPref && daysApart <=0 && sub.userNotified == false){
                 Log.i("Background process", "2 days or 1 day before");
+                sub.userNotified = true;
+                Log.i("Background process", "2 days or 1 day before");
+
                 //Notification;
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "Sub Notification");
