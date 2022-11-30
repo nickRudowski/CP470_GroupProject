@@ -37,6 +37,15 @@
         android:layout_toRightOf="@+id/EditTextFrag"
         android:id="@+id/Submit"
         android:text="@string/Submit" />
+
+    <ProgressBar
+        android:id="@+id/ProgressBar"
+        android:layout_width="500px"
+        android:layout_height="200px"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="100dp"
+        android:visibility="invisible"
+        style="?android:attr/progressBarStyleHorizontal"/>
 </RelativeLayout>
 
 </FrameLayout>

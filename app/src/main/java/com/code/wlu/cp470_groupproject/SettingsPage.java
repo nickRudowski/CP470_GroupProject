@@ -1,17 +1,21 @@
 package com.code.wlu.cp470_groupproject;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,11 +23,17 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+
 public class SettingsPage extends AppCompatActivity {
 
     public String loginUsername;
     public String ACTIVITY_NAME = "SettingsPage";
-
     public TextView UsernameTitle;
     public TextView NotifsTitle;
     public Button EditNotifsButton;
@@ -35,7 +45,6 @@ public class SettingsPage extends AppCompatActivity {
         setContentView(R.layout.activity_settings_page);
         Toolbar toolbar = findViewById(R.id.toolBar);
         setSupportActionBar(toolbar);
-
         UsernameTitle = findViewById(R.id.UsernameTitle);
         NotifsTitle = findViewById(R.id.NotifsTitle);
         EditNotifsButton = findViewById(R.id.EditNotifsButton);
@@ -51,6 +60,7 @@ public class SettingsPage extends AppCompatActivity {
         UsernameTitle.setText("User Login: "+ loginUsername);
         // Start Edit Notification Fragment
 
+        // start fragment for the Edit form when user clicks the button
         EditNotifsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -59,7 +69,10 @@ public class SettingsPage extends AppCompatActivity {
                 NotificationFragment fragment = (NotificationFragment) fragmentManager.findFragmentByTag("tag");
                 if(fragment == null) {
                     Log.i(ACTIVITY_NAME,"Adding Fragment");
+                    Bundle message = new Bundle();
+                    message.putString("user", loginUsername);
                     fragment = new NotificationFragment();
+                    fragment.setArguments(message);
                     fragmentTransaction.add(R.id.EditNotifFragment, fragment, "tag");
                     fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 } else {
@@ -70,9 +83,15 @@ public class SettingsPage extends AppCompatActivity {
                 fragmentTransaction.commit();
             }
         });
-
+        // get the result back from the Fragment to Update the UI
+        getSupportFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                String result = bundle.getString("updateUI");
+                NotifsTitle.setText("Notification Preferences: "+ result);
+            }
+        });
     }
-
 
     public boolean onCreateOptionsMenu(Menu m){
         getMenuInflater().inflate(R.menu.toolbar_menu, m );
